@@ -81,7 +81,7 @@ The hardened pod passed most checks:
 Remaining issue:
 - Using default service account (`no-default-sa`)
 
-This means the container is mostly compliant but can still be improved further.
+This means the container is mostly compliant but can still be improved further. The remaining issue can be fixed by creating and assigning a dedicated service account.
 
 ---
 
