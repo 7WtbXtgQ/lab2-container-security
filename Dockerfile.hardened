@@ -1,19 +1,32 @@
+# Use a minimal base image to reduce attack surface
 FROM python:3.12-slim-bookworm
 
-# Non-root user
+# Create a non-root user and group for better security
+# Running containers as root is a common security risk
 RUN groupadd -r appgroup && useradd -r -g appgroup appuser
 
+# Set working directory inside container
 WORKDIR /app
 
+# Copy only requirements first to leverage Docker layer caching
 COPY requirements.txt .
+
+# Install dependencies without caching to reduce image size
 RUN pip install --no-cache-dir -r requirements.txt
 
+# Copy application code and set proper ownership to non-root user
 COPY --chown=appuser:appgroup app.py .
 
+# Switch to non-root user
 USER appuser
+
+# Document which port the application uses
 EXPOSE 5000
 
+# Healthcheck to ensure the app is running
+# This helps orchestration systems detect unhealthy containers
 HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
   CMD python -c "import urllib.request; urllib.request.urlopen('http://localhost:5000/')" || exit 1
 
+# Run the application
 CMD ["python", "app.py"]
